@@ -1,6 +1,6 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
- <head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260630-05-8900874"}');</script><script src="/_sdk/e4192b04afde3ce7.telemetry_sdk.js" integrity="sha512-4eZpyKBd3YJnsIPrIpaBqo7QT5UZ6+KSFXkSu1IQiB7jKM8y67ChRhZ5Yh6JfuOJCbPdISiNcS6nLKZzIMG1uQ=="></script>
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Arbitrage Calculator (HFT)</title>
@@ -8,110 +8,162 @@
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
   <style>
-  body { font-family: 'DM Sans', sans-serif; }
-  .mono { font-family: 'Space Mono', monospace; }
-  @keyframes flashUp { 0% { color:#34d399; } 100% { color:inherit; } }
-  @keyframes flashDown { 0% { color:#f87171; } 100% { color:inherit; } }
-  .flash-up { animation: flashUp 0.9s ease-out; }
-  .flash-down { animation: flashDown 0.9s ease-out; }
-  @keyframes fadeUp { from { opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }
-  .reveal { animation: fadeUp 0.6s ease-out both; }
-  .pulse-dot { animation: pulse 1.6s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-  input:focus-visible, button:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
-</style>
-  <script src="/_sdk/48bf7c4c70d0d03c.data_sdk.js" type="text/javascript" integrity="sha512-e/yrQJz+prdXXt4yUvxXhl1WBGu3BRkP8X0fipGXI5gqiFClI7wI6K3TQnD7d63vx+BVhwzIvY6r8OrpX7lXJA=="></script>
-  <script src="/_sdk/5d8c692e132d2125.resizing_sdk.js" type="text/javascript" integrity="sha512-/Du3Fqe12kKsCd3BrbaNQEPtMxQi9S5hbJhnTf09AAilpqYsGa4N0rnimSX1Ui4dwNElKlen6VlI+E1n/NEfrA=="></script>
- </head>
- <body data-template-id="__page-root" class="min-h-screen w-full text-slate-100">
-  <header class="canva-header w-full px-6 pt-8 pb-4 max-w-5xl mx-auto reveal">
-   <div class="flex items-center gap-3 flex-wrap">
-    <h1 data-template-id="app-title" class="canva-text font-bold"></h1><span data-template-id="demo-badge" class="canva-tag px-2.5 py-1 rounded-md text-xs font-bold tracking-wide"></span>
-   </div>
-   <p data-template-id="app-subtitle" class="canva-text mt-2 text-slate-400"></p>
-  </header><!-- Live ticker -->
-  <section class="canva-section w-full max-w-5xl mx-auto px-6">
-   <div class="flex items-center gap-2 mb-2"><span class="pulse-dot inline-block w-2 h-2 rounded-full bg-emerald-400"></span> <span data-template-id="ticker-title" class="canva-text text-xs uppercase tracking-widest text-slate-400"></span>
-   </div>
-   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-    <div data-template-id="ticker-card-btc" class="canva-card rounded-xl p-4 border border-white/5">
-     <div class="flex items-center justify-between"><span data-template-id="ticker-btc-label" class="canva-text font-medium"></span> <span class="mono text-xs px-1.5 py-0.5 rounded" id="btc-change">—</span>
-     </div>
-     <div class="mono text-2xl mt-1 font-bold" id="btc-price">
-      Loading…
-     </div>
+    body { font-family: 'DM Sans', sans-serif; background: #0f172a; }
+    .mono { font-family: 'Space Mono', monospace; }
+    @keyframes flashUp { 0% { color:#34d399; } 100% { color:inherit; } }
+    @keyframes flashDown { 0% { color:#f87171; } 100% { color:inherit; } }
+    .flash-up { animation: flashUp 0.9s ease-out; }
+    .flash-down { animation: flashDown 0.9s ease-out; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }
+    .reveal { animation: fadeUp 0.6s ease-out both; }
+    .pulse-dot { animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    input:focus-visible, button:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+  </style>
+</head>
+<body class="min-h-screen w-full text-slate-100">
+  <!-- Header -->
+  <header class="w-full px-6 pt-8 pb-4 max-w-5xl mx-auto reveal">
+    <div class="flex items-center gap-3 flex-wrap">
+      <h1 class="font-bold text-2xl">⚖️ Arbitrage Calculator</h1>
+      <span class="px-2.5 py-1 rounded-md text-xs font-bold tracking-wide bg-emerald-500/20 text-emerald-300">DEMO</span>
     </div>
-    <div data-template-id="ticker-card-eth" class="canva-card rounded-xl p-4 border border-white/5">
-     <div class="flex items-center justify-between"><span data-template-id="ticker-eth-label" class="canva-text font-medium"></span> <span class="mono text-xs px-1.5 py-0.5 rounded" id="eth-change">—</span>
-     </div>
-     <div class="mono text-2xl mt-1 font-bold" id="eth-price">
-      Loading…
-     </div>
+    <p class="mt-2 text-slate-400">Transactions by HFT engines.</p>
+  </header>
+
+  <!-- Live ticker -->
+  <section class="w-full max-w-5xl mx-auto px-6">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="pulse-dot inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+      <span class="text-xs uppercase tracking-widest text-slate-400">Live Prices</span>
     </div>
-    <div data-template-id="ticker-card-bnb" class="canva-card rounded-xl p-4 border border-white/5">
-     <div class="flex items-center justify-between"><span data-template-id="ticker-bnb-label" class="canva-text font-medium"></span> <span class="mono text-xs px-1.5 py-0.5 rounded" id="bnb-change">—</span>
-     </div>
-     <div class="mono text-2xl mt-1 font-bold" id="bnb-price">
-      Loading…
-     </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="rounded-xl p-4 border border-white/5 bg-slate-900/50">
+        <div class="flex items-center justify-between">
+          <span class="font-medium">Bitcoin</span>
+          <span class="mono text-xs px-1.5 py-0.5 rounded" id="btc-change">—</span>
+        </div>
+        <div class="mono text-2xl mt-1 font-bold" id="btc-price">Loading…</div>
+      </div>
+      <div class="rounded-xl p-4 border border-white/5 bg-slate-900/50">
+        <div class="flex items-center justify-between">
+          <span class="font-medium">Ethereum</span>
+          <span class="mono text-xs px-1.5 py-0.5 rounded" id="eth-change">—</span>
+        </div>
+        <div class="mono text-2xl mt-1 font-bold" id="eth-price">Loading…</div>
+      </div>
+      <div class="rounded-xl p-4 border border-white/5 bg-slate-900/50">
+        <div class="flex items-center justify-between">
+          <span class="font-medium">BNB</span>
+          <span class="mono text-xs px-1.5 py-0.5 rounded" id="bnb-change">—</span>
+        </div>
+        <div class="mono text-2xl mt-1 font-bold" id="bnb-price">Loading…</div>
+      </div>
     </div>
-   </div>
-   <p id="ticker-status" class="text-xs text-slate-500 mt-2 mono hidden"></p>
+    <p id="ticker-status" class="text-xs text-slate-500 mt-2 mono hidden"></p>
   </section>
-  <main class="w-full max-w-5xl mx-auto px-6 py-6 grid lg:grid-cols-2 gap-6"><!-- Inputs -->
-   <form id="arb-form" data-template-id="form-panel" class="canva-panel rounded-2xl p-6 border border-white/5 reveal" style="animation-delay:.1s">
-    <h2 data-template-id="inputs-heading" class="canva-text font-bold mb-4"></h2>
-    <div class="mb-4"><label data-template-id="pair-label" for="pair-input" class="canva-text block text-sm mb-1 text-slate-300"></label> <input id="pair-input" type="text" data-template-id="pair-input" class="canva-input w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-    </div>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-     <div><label data-template-id="platform-a-label" for="platform-a-input" class="canva-text block text-sm mb-1 text-slate-300"></label> <input id="platform-a-input" type="text" data-template-id="platform-a-input" class="canva-input w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100">
-     </div>
-     <div><label data-template-id="platform-b-label" for="platform-b-input" class="canva-text block text-sm mb-1 text-slate-300"></label> <input id="platform-b-input" type="text" data-template-id="platform-b-input" class="canva-input w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100">
-     </div>
-    </div>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-     <div><label data-template-id="price-a-label" for="price-a-input" class="canva-text block text-sm mb-1 text-slate-300"></label> <input id="price-a-input" type="number" step="any" data-template-id="price-a-input" class="canva-input w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-     </div>
-     <div><label data-template-id="price-b-label" for="price-b-input" class="canva-text block text-sm mb-1 text-slate-300"></label> <input id="price-b-input" type="number" step="any" data-template-id="price-b-input" class="canva-input w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-     </div>
-    </div>
-    <div class="grid grid-cols-2 gap-3 mb-4">
-     <div><label data-template-id="capital-label" for="capital-input" class="canva-text block text-sm mb-1 text-slate-300"></label> <input id="capital-input" type="number" step="any" data-template-id="capital-input" class="canva-input w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-     </div>
-     <div><label data-template-id="pnl-label" for="pnl-input" class="canva-text block text-sm mb-1 text-slate-300"></label> <input id="pnl-input" type="number" step="any" data-template-id="pnl-input" class="canva-input w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-     </div>
-    </div>
-    <div class="mb-5"><label data-template-id="transactions-label" for="transactions-input" class="canva-text block text-sm mb-1 text-slate-300"></label> <input id="transactions-input" type="number" step="1" min="1" data-template-id="transactions-input" class="canva-input w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-    </div>
-    <p id="form-error" class="text-sm text-red-400 mb-3 hidden" role="alert"></p>
-    <div class="flex gap-3"><button type="button" id="reset-btn" data-template-id="reset-button" class="canva-button flex-1 rounded-lg px-4 py-2.5 font-bold flex items-center justify-center gap-2"><i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i><span data-template-id="reset-button-text"></span></button>
-    </div>
-   </form><!-- Results -->
-   <section data-template-id="results-panel" class="canva-panel rounded-2xl p-6 border border-white/5 reveal flex flex-col" style="animation-delay:.2s">
-    <h2 data-template-id="results-heading" class="canva-text font-bold mb-4"></h2>
-    <div class="space-y-4 flex-1">
-     <div class="flex items-center justify-between border-b border-white/5 pb-3"><span data-template-id="result-spread-label" class="canva-text text-slate-300"></span> <span id="out-spread" class="mono text-xl font-bold">—</span>
-     </div>
-     <div class="flex items-center justify-between border-b border-white/5 pb-3"><span data-template-id="result-gross-label" class="canva-text text-slate-300"></span> <span id="out-gross" class="mono text-xl font-bold">—</span>
-     </div>
-     <div class="flex items-center justify-between"><span data-template-id="result-pnl-label" class="canva-text text-slate-300"></span> <span id="out-pnl" class="mono text-2xl font-bold">—</span>
-     </div>
-    </div>
-    <div class="mt-5 flex items-center gap-2"><span id="status-pill" class="mono text-sm font-bold px-3 py-1.5 rounded-lg bg-slate-700/60 text-slate-300">Awaiting input</span>
-    </div>
-   </section>
+
+  <!-- Main Content -->
+  <main class="w-full max-w-5xl mx-auto px-6 py-6 grid lg:grid-cols-2 gap-6">
+    <!-- Inputs Panel -->
+    <form id="arb-form" class="rounded-2xl p-6 border border-white/5 bg-slate-900/50 reveal" style="animation-delay:.1s">
+      <h2 class="font-bold mb-4 text-lg">Trade Parameters</h2>
+      
+      <div class="mb-4">
+        <label for="pair-input" class="block text-sm mb-1 text-slate-300">Trading Pair</label>
+        <input id="pair-input" type="text" value="BTC/USDT" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div>
+          <label for="platform-a-input" class="block text-sm mb-1 text-slate-300">Platform A</label>
+          <input id="platform-a-input" type="text" value="Binance" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100">
+        </div>
+        <div>
+          <label for="platform-b-input" class="block text-sm mb-1 text-slate-300">Platform B</label>
+          <input id="platform-b-input" type="text" value="Kraken" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div>
+          <label for="price-a-input" class="block text-sm mb-1 text-slate-300">Price A (Platform A)</label>
+          <input id="price-a-input" type="number" step="any" value="64200" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
+        </div>
+        <div>
+          <label for="price-b-input" class="block text-sm mb-1 text-slate-300">Price B (Platform B)</label>
+          <input id="price-b-input" type="number" step="any" value="64350" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div>
+          <label for="capital-input" class="block text-sm mb-1 text-slate-300">Capital (USDT)</label>
+          <input id="capital-input" type="number" step="any" value="1000" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
+        </div>
+        <div>
+          <label for="pnl-input" class="block text-sm mb-1 text-slate-300">PNL (Manual Override)</label>
+          <input id="pnl-input" type="number" step="any" placeholder="Optional" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <label for="transactions-input" class="block text-sm mb-1 text-slate-300">Number of Transactions</label>
+        <input id="transactions-input" type="number" step="1" min="1" value="1" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
+      </div>
+
+      <p id="form-error" class="text-sm text-red-400 mb-3 hidden" role="alert"></p>
+
+      <div class="flex gap-3">
+        <button type="button" id="reset-btn" class="flex-1 rounded-lg px-4 py-2.5 font-bold flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 transition-colors">
+          <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i>
+          <span>Reset</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Results Panel -->
+    <section class="rounded-2xl p-6 border border-white/5 bg-slate-900/50 reveal flex flex-col" style="animation-delay:.2s">
+      <h2 class="font-bold mb-4 text-lg">Results</h2>
+      <div class="space-y-4 flex-1">
+        <div class="flex items-center justify-between border-b border-white/5 pb-3">
+          <span class="text-slate-300">Spread</span>
+          <span id="out-spread" class="mono text-xl font-bold">—</span>
+        </div>
+        <div class="flex items-center justify-between border-b border-white/5 pb-3">
+          <span class="text-slate-300">Gross Profit</span>
+          <span id="out-gross" class="mono text-xl font-bold">—</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <span class="text-slate-300">Net PNL</span>
+          <span id="out-pnl" class="mono text-2xl font-bold">—</span>
+        </div>
+      </div>
+      <div class="mt-5 flex items-center gap-2">
+        <span id="status-pill" class="mono text-sm font-bold px-3 py-1.5 rounded-lg bg-slate-700/60 text-slate-300">Awaiting input</span>
+      </div>
+    </section>
   </main>
+
+  <!-- Footer -->
   <footer class="w-full max-w-5xl mx-auto px-6 pb-10">
-   <p data-template-id="footer-note" class="canva-text text-xs text-slate-500 text-center"></p>
+    <p class="text-xs text-slate-500 text-center">Arbitrage Calculator Demo — For planning purposes only. No real trades are executed.</p>
   </footer>
-  <script src="/_sdk/c94a279e896d0a23.editing_sdk.js" integrity="sha512-uhzUP50YzTVKO+Zk7rEhhvjMMNFy592eHXVEXciJzhLpIQxrlwzWv/DQvyYWQ+AKpYwxxCvjgWkVa5LTga2NWg=="></script>
+
   <script>
     lucide.createIcons();
 
     const $ = id => document.getElementById(id);
     const fmtUSD = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    // ---- Auto-calculate on input ----
     const form = $('arb-form');
     const errEl = $('form-error');
 
@@ -172,6 +224,14 @@
       const pill = $('status-pill');
       pill.textContent = 'Awaiting input';
       pill.className = 'mono text-sm font-bold px-3 py-1.5 rounded-lg bg-slate-700/60 text-slate-300';
+      // Set default values after reset
+      $('pair-input').value = 'BTC/USDT';
+      $('platform-a-input').value = 'Binance';
+      $('platform-b-input').value = 'Kraken';
+      $('price-a-input').value = '64200';
+      $('price-b-input').value = '64350';
+      $('capital-input').value = '1000';
+      $('transactions-input').value = '1';
     });
 
     // ---- Live ticker (CoinGecko) ----
@@ -195,7 +255,7 @@
       const status = $('ticker-status');
       try {
         const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=usd&include_24hr_change=true');
-        if(!res.ok) throw new Error('bad');
+        if(!res.ok) throw new Error('API error');
         const data = await res.json();
         status.classList.add('hidden');
         for (const [id, sym] of Object.entries(COINS)){
@@ -218,5 +278,5 @@
     fetchPrices();
     setInterval(fetchPrices, 30000);
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a1405a199654cd40',t:'MTc4Mjg1NTg2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
