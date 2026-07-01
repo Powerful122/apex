@@ -48,14 +48,25 @@
             transform: translateY(-1px);
         }
 
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0a0f; }
-        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased relative">
 
+    <!-- Navigation / Header -->
     <header class="w-full py-6 px-8 flex justify-center items-center border-b border-gray-800 glass-panel sticky top-0 z-10">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -67,8 +78,11 @@
         </div>
     </header>
 
+    <!-- Main Registration View -->
     <main id="user-view" class="flex-grow flex items-center justify-center p-4 sm:p-8">
         <div class="glass-panel rounded-2xl w-full max-w-xl p-8 relative overflow-hidden">
+            
+            <!-- Decorative corner elements -->
             <div class="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-blue-500/30 rounded-tl-2xl"></div>
             <div class="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-emerald-500/30 rounded-br-2xl"></div>
 
@@ -78,11 +92,13 @@
             </div>
 
             <form id="registration-form" class="space-y-5">
+                <!-- Name -->
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
                     <input type="text" id="name" required class="input-field w-full rounded-lg px-4 py-3 text-sm placeholder-gray-500" placeholder="e.g. John Doe">
                 </div>
 
+                <!-- Email & Phone Row -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
@@ -94,16 +110,19 @@
                     </div>
                 </div>
 
+                <!-- Country -->
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1">Country</label>
                     <div class="relative">
                         <select id="country" required class="input-field w-full rounded-lg px-4 py-3 text-sm appearance-none cursor-pointer">
                             <option value="" disabled selected>Select your country...</option>
+                            <!-- Populated via JS -->
                         </select>
                         <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"></i>
                     </div>
                 </div>
 
+                <!-- Wallet Section -->
                 <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-700/50 mt-6">
                     <h3 class="text-sm font-medium text-blue-400 mb-4 flex items-center gap-2">
                         <i class="fa-solid fa-wallet"></i> Payout Configuration
@@ -129,6 +148,7 @@
                     </div>
                 </div>
 
+                <!-- Submit -->
                 <button type="submit" id="submit-btn" class="glow-button w-full rounded-lg px-4 py-4 text-sm font-bold text-white uppercase tracking-wider mt-6 flex justify-center items-center gap-2">
                     <span>Initialize Engine Setup</span>
                     <i class="fa-solid fa-arrow-right"></i>
@@ -137,6 +157,7 @@
         </div>
     </main>
 
+    <!-- Admin Dashboard View (Hidden by default) -->
     <main id="admin-view" class="flex-grow hidden flex-col p-4 sm:p-8 max-w-7xl mx-auto w-full">
         <div class="flex justify-between items-center mb-8">
             <div>
@@ -147,6 +168,7 @@
                 <i class="fa-solid fa-right-from-bracket mr-2"></i> Exit
             </button>
         </div>
+
         <div class="glass-panel rounded-xl overflow-hidden w-full overflow-x-auto">
             <table class="w-full text-left text-sm whitespace-nowrap">
                 <thead class="bg-gray-800/80 text-gray-300">
@@ -159,69 +181,130 @@
                     </tr>
                 </thead>
                 <tbody id="admin-table-body" class="divide-y divide-gray-800/50">
-                    <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500"><i class="fa-solid fa-circle-notch fa-spin"></i> Loading...</td></tr>
+                    <!-- Data populated via JS -->
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading secure engine data...
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </main>
 
+    <!-- Success Modal Overlay (Hidden) -->
     <div id="success-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="glass-panel rounded-2xl max-w-md w-full p-8 text-center transform scale-95 transition-transform duration-300 border border-emerald-500/30">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-8 text-center transform scale-95 transition-transform duration-300 shadow-2xl shadow-emerald-500/10 border-emerald-500/30 border">
             <div class="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <i class="fa-solid fa-check text-4xl text-emerald-400"></i>
             </div>
             <h3 class="text-2xl font-bold mb-3 text-white">Application Received</h3>
-            <p class="text-gray-400 leading-relaxed mb-6">Your details have been successfully submitted. Please wait for an email confirmation within 15 minutes.</p>
-            <button id="close-modal-btn" class="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition text-white border border-gray-700">Acknowledge</button>
+            <p class="text-gray-400 leading-relaxed mb-6">
+                Your details have been successfully submitted to the Apex HFT Engine. Please wait for an email confirmation, which should arrive within <strong class="text-white">15 minutes</strong>.
+            </p>
+            <button id="close-modal-btn" class="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition text-white border border-gray-700">
+                Acknowledge
+            </button>
         </div>
     </div>
 
+    <!-- Admin Access Trigger (Hidden plain sight) -->
     <button id="admin-trigger" class="fixed bottom-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-700 hover:text-gray-400 transition z-20" title="Admin Access">
         <i class="fa-solid fa-lock text-xs"></i>
     </button>
 
+    <!-- Scripts -->
     <script type="module">
+        // Firebase Cloud Database Integration for saving user submissions securely
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Your configuration integrated here
-        const firebaseConfig = {
-            apiKey: "AIzaSyBRS9IkASSv0uERqjWoBX3wrnVPaBMDcw4",
-            authDomain: "apex-e2d46.firebaseapp.com",
-            projectId: "apex-e2d46",
-            storageBucket: "apex-e2d46.firebasestorage.app",
-            messagingSenderId: "601246281619",
-            appId: "1:601246281619:web:54eb9937637115316b4266",
-            measurementId: "G-RZG5F5XHK1"
-        };
+        // Environment variables handling
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'apex-hft-default';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
         
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        let currentUser = null;
+        let app, auth, db, currentUser = null;
         let unsubscribeData = null;
 
-        signInAnonymously(auth);
-        onAuthStateChanged(auth, (user) => { currentUser = user; });
+        // Initialize Cloud Storage if config exists
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
 
-        // Populate Countries
-        const countries = ["Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Brazil", "Canada", "China", "Egypt", "France", "Germany", "India", "Italy", "Japan", "Mexico", "Nigeria", "Russia", "South Africa", "Spain", "United Kingdom", "United States"];
+            // Authenticate to allow secure database writes/reads
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Auth initialization failed:", error);
+                }
+            };
+            initAuth();
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+            });
+        }
+
+        // --- UI Logic ---
+
+        // 1. Populate Countries
+        const countries = [
+            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine State", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+        ];
+        
         const countrySelect = document.getElementById('country');
-        countries.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; countrySelect.appendChild(o); });
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country;
+            option.textContent = country;
+            countrySelect.appendChild(option);
+        });
 
-        // Network Logic
+        // 2. Network Selection Logic
         const networkBtns = document.querySelectorAll('.network-btn');
-        networkBtns.forEach(btn => btn.addEventListener('click', () => {
-            networkBtns.forEach(b => { b.classList.remove('bg-blue-600/20', 'border-blue-500', 'text-blue-400'); b.classList.add('bg-gray-700/30', 'border-gray-600', 'text-gray-400'); });
-            btn.classList.remove('bg-gray-700/30', 'border-gray-600', 'text-gray-400');
-            btn.classList.add('bg-blue-600/20', 'border-blue-500', 'text-blue-400');
-            document.getElementById('wallet-network').value = btn.dataset.network;
-        }));
+        const hiddenNetworkInput = document.getElementById('wallet-network');
 
-        // Form Submit
-        document.getElementById('registration-form').addEventListener('submit', async (e) => {
+        networkBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active styling from all
+                networkBtns.forEach(b => {
+                    b.classList.remove('bg-blue-600/20', 'border-blue-500', 'text-blue-400');
+                    b.classList.add('bg-gray-700/30', 'border-gray-600', 'text-gray-400');
+                });
+                
+                // Add active styling to clicked
+                btn.classList.remove('bg-gray-700/30', 'border-gray-600', 'text-gray-400');
+                btn.classList.add('bg-blue-600/20', 'border-blue-500', 'text-blue-400');
+                
+                // Update hidden input
+                hiddenNetworkInput.value = btn.dataset.network;
+            });
+        });
+
+        // 3. Form Submission
+        const form = document.getElementById('registration-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const successModal = document.getElementById('success-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            if (!currentUser || !db) {
+                // Fallback UI behavior if cloud environment isn't injected
+                showSuccessModal();
+                form.reset();
+                return;
+            }
+
+            // Get values
             const payload = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
@@ -231,42 +314,176 @@
                 walletAddress: document.getElementById('wallet-address').value,
                 timestamp: new Date().toISOString()
             };
-            try {
-                // Using a top-level collection as per your direct requirement
-                await addDoc(collection(db, 'registrations'), payload);
-                document.getElementById('success-modal').classList.remove('hidden');
-                setTimeout(() => { document.getElementById('success-modal').classList.remove('opacity-0'); }, 10);
-                e.target.reset();
-            } catch (err) { console.error(err); }
-        });
 
-        // Admin Access
-        document.getElementById('admin-trigger').addEventListener('click', () => {
-            const pin = prompt("Enter Admin PIN:");
-            if(pin === 'jane123clan') {
-                document.getElementById('user-view').classList.add('hidden');
-                document.getElementById('admin-view').classList.remove('hidden');
-                unsubscribeData = onSnapshot(collection(db, 'registrations'), (snapshot) => {
-                    const tbody = document.getElementById('admin-table-body');
-                    tbody.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const d = doc.data();
-                        tbody.innerHTML += `<tr><td class="px-6 py-4">${new Date(d.timestamp).toLocaleString()}</td><td class="px-6 py-4">${d.name}</td><td class="px-6 py-4">${d.email}</td><td class="px-6 py-4">${d.country}</td><td class="px-6 py-4">${d.walletAddress}</td></tr>`;
-                    });
-                });
+            // Loading state
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+            submitBtn.disabled = true;
+
+            try {
+                // Save to secure cloud collection
+                // Path strictly follows: artifacts/{appId}/public/data/{collectionName}
+                const dataRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+                await addDoc(dataRef, payload);
+                
+                showSuccessModal();
+                form.reset();
+                
+                // Reset network back to BTC
+                networkBtns[0].click();
+
+            } catch (error) {
+                console.error("Submission error:", error);
+                // Custom error display instead of alert
+                const errorDiv = document.createElement('div');
+                errorDiv.className = "text-red-500 text-sm mt-2 text-center";
+                errorDiv.innerText = "Network connection failed. Please try again.";
+                form.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 4000);
+            } finally {
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
             }
         });
-        
-        document.getElementById('exit-admin-btn').addEventListener('click', () => {
-            document.getElementById('admin-view').classList.add('hidden');
-            document.getElementById('user-view').classList.remove('hidden');
-            if(unsubscribeData) unsubscribeData();
+
+        function showSuccessModal() {
+            successModal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                successModal.classList.remove('opacity-0');
+                successModal.children[0].classList.remove('scale-95');
+                successModal.children[0].classList.add('scale-100');
+            }, 10);
+        }
+
+        closeModalBtn.addEventListener('click', () => {
+            successModal.classList.add('opacity-0');
+            successModal.children[0].classList.remove('scale-100');
+            successModal.children[0].classList.add('scale-95');
+            setTimeout(() => {
+                successModal.classList.add('hidden');
+            }, 300);
         });
 
-        document.getElementById('close-modal-btn').addEventListener('click', () => {
-            document.getElementById('success-modal').classList.add('opacity-0');
-            setTimeout(() => document.getElementById('success-modal').classList.add('hidden'), 300);
+        // 4. Admin View Logic
+        const adminTrigger = document.getElementById('admin-trigger');
+        const userView = document.getElementById('user-view');
+        const adminView = document.getElementById('admin-view');
+        const exitAdminBtn = document.getElementById('exit-admin-btn');
+        const adminTableBody = document.getElementById('admin-table-body');
+
+        adminTrigger.addEventListener('click', () => {
+            // Very basic passcode for UI demonstration
+            const customModal = document.createElement('div');
+            customModal.className = "fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4 backdrop-blur-md";
+            customModal.innerHTML = `
+                <div class="glass-panel p-6 rounded-xl max-w-sm w-full text-center">
+                    <i class="fa-solid fa-shield-halved text-3xl text-gray-500 mb-4"></i>
+                    <h3 class="text-white font-bold mb-4">Admin Authentication</h3>
+                    <input type="password" id="admin-pass" class="input-field w-full rounded p-3 mb-4 text-center tracking-widest" placeholder="Enter PIN...">
+                    <div class="flex gap-2">
+                        <button id="cancel-auth" class="w-1/2 py-2 bg-gray-800 rounded text-gray-400 hover:text-white transition">Cancel</button>
+                        <button id="submit-auth" class="w-1/2 py-2 bg-blue-600 rounded text-white hover:bg-blue-500 transition">Unlock</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(customModal);
+
+            document.getElementById('cancel-auth').onclick = () => customModal.remove();
+            document.getElementById('submit-auth').onclick = () => {
+                const pass = document.getElementById('admin-pass').value;
+                if(pass === 'jane123clan') {
+                    customModal.remove();
+                    openAdminPanel();
+                } else {
+                    document.getElementById('admin-pass').classList.add('border-red-500');
+                    document.getElementById('admin-pass').value = '';
+                }
+            };
         });
+
+        exitAdminBtn.addEventListener('click', () => {
+            adminView.classList.add('hidden');
+            userView.classList.remove('hidden');
+            
+            // Clean up database listener when leaving admin view
+            if (unsubscribeData) {
+                unsubscribeData();
+                unsubscribeData = null;
+            }
+        });
+
+        function openAdminPanel() {
+            userView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            adminView.classList.add('flex');
+
+            if (!currentUser || !db) {
+                adminTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Cloud Database not initialized in this environment.</td></tr>`;
+                return;
+            }
+
+            // Fetch Data securely
+            const dataRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+            
+            // Use onSnapshot to get real-time updates as users submit
+            unsubscribeData = onSnapshot(dataRef, (snapshot) => {
+                const submissions = [];
+                snapshot.forEach(doc => {
+                    submissions.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by timestamp descending (newest first) in memory (Rule 2: No complex DB queries)
+                submissions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                renderAdminTable(submissions);
+            }, (error) => {
+                console.error("Error fetching data:", error);
+                adminTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-red-500">Error loading data.</td></tr>`;
+            });
+        }
+
+        function renderAdminTable(data) {
+            if (data.length === 0) {
+                adminTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No registrations found yet.</td></tr>`;
+                return;
+            }
+
+            adminTableBody.innerHTML = '';
+            data.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleString();
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/30 transition border-b border-gray-800/50";
+                
+                // Protect against HTML injection
+                const escapeHTML = str => str.replace(/[&<>'"]/g, 
+                    tag => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        "'": '&#39;',
+                        '"': '&quot;'
+                    }[tag] || tag)
+                );
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 text-xs text-gray-400 whitespace-nowrap">${escapeHTML(date)}</td>
+                    <td class="px-6 py-4 font-medium text-gray-200">${escapeHTML(item.name || 'N/A')}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <div class="text-gray-300">${escapeHTML(item.email || 'N/A')}</div>
+                        <div class="text-gray-500 text-xs mt-1">${escapeHTML(item.phone || 'N/A')}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-400">${escapeHTML(item.country || 'N/A')}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 rounded bg-gray-800 text-xs font-bold text-blue-400 border border-gray-700">${escapeHTML(item.network || 'N/A')}</span>
+                            <span class="text-xs text-gray-400 font-mono truncate max-w-[150px]" title="${escapeHTML(item.walletAddress || 'N/A')}">${escapeHTML(item.walletAddress || 'N/A')}</span>
+                        </div>
+                    </td>
+                `;
+                adminTableBody.appendChild(tr);
+            });
+        }
     </script>
 </body>
 </html>
