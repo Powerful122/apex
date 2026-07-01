@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -216,16 +217,9 @@
     <!-- Scripts -->
     <script type="module">
         // Firebase Cloud Database Integration for saving user submissions securely
-     // Your provided configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBRS9IkASSv0uERqjWoBX3wrnVPaBMDcw4",
-            authDomain: "apex-e2d46.firebaseapp.com",
-            projectId: "apex-e2d46",
-            storageBucket: "apex-e2d46.firebasestorage.app",
-            messagingSenderId: "601246281619",
-            appId: "1:601246281619:web:54eb9937637115316b4266",
-            measurementId: "G-RZG5F5XHK1"
-        };
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Environment variables handling
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'apex-hft-default';
@@ -494,3 +488,21 @@
     </script>
 </body>
 </html>
+```
+
+ 
+ 
+ 
+ 
+on this code please add this firebase config correctly so the backend is handled smoothly
+ 
+// Your provided configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRS9IkASSv0uERqjWoBX3wrnVPaBMDcw4",
+            authDomain: "apex-e2d46.firebaseapp.com",
+            projectId: "apex-e2d46",
+            storageBucket: "apex-e2d46.firebasestorage.app",
+            messagingSenderId: "601246281619",
+            appId: "1:601246281619:web:54eb9937637115316b4266",
+            measurementId: "G-RZG5F5XHK1"
+        };
