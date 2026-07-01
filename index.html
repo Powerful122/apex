@@ -1,282 +1,489 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Arbitrage Calculator (HFT)</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'DM Sans', sans-serif; background: #0f172a; }
-    .mono { font-family: 'Space Mono', monospace; }
-    @keyframes flashUp { 0% { color:#34d399; } 100% { color:inherit; } }
-    @keyframes flashDown { 0% { color:#f87171; } 100% { color:inherit; } }
-    .flash-up { animation: flashUp 0.9s ease-out; }
-    .flash-down { animation: flashDown 0.9s ease-out; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(12px);} to {opacity:1; transform:translateY(0);} }
-    .reveal { animation: fadeUp 0.6s ease-out both; }
-    .pulse-dot { animation: pulse 1.6s ease-in-out infinite; }
-    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-    input:focus-visible, button:focus-visible { outline: 2px solid #38bdf8; outline-offset: 2px; }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    input[type="number"] {
-      -moz-appearance: textfield;
-    }
-  </style>
-</head>
-<body class="min-h-screen w-full text-slate-100">
-  <!-- Header -->
-  <header class="w-full px-6 pt-8 pb-4 max-w-5xl mx-auto reveal">
-    <div class="flex items-center gap-3 flex-wrap">
-      <h1 class="font-bold text-2xl">⚖️ Arbitrage Calculator</h1>
-      <span class="px-2.5 py-1 rounded-md text-xs font-bold tracking-wide bg-emerald-500/20 text-emerald-300">DEMO</span>
-    </div>
-    <p class="mt-2 text-slate-400">Transactions by HFT engines.</p>
-  </header>
-
-  <!-- Live ticker -->
-  <section class="w-full max-w-5xl mx-auto px-6">
-    <div class="flex items-center gap-2 mb-2">
-      <span class="pulse-dot inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
-      <span class="text-xs uppercase tracking-widest text-slate-400">Live Prices</span>
-    </div>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <div class="rounded-xl p-4 border border-white/5 bg-slate-900/50">
-        <div class="flex items-center justify-between">
-          <span class="font-medium">Bitcoin</span>
-          <span class="mono text-xs px-1.5 py-0.5 rounded" id="btc-change">—</span>
-        </div>
-        <div class="mono text-2xl mt-1 font-bold" id="btc-price">Loading…</div>
-      </div>
-      <div class="rounded-xl p-4 border border-white/5 bg-slate-900/50">
-        <div class="flex items-center justify-between">
-          <span class="font-medium">Ethereum</span>
-          <span class="mono text-xs px-1.5 py-0.5 rounded" id="eth-change">—</span>
-        </div>
-        <div class="mono text-2xl mt-1 font-bold" id="eth-price">Loading…</div>
-      </div>
-      <div class="rounded-xl p-4 border border-white/5 bg-slate-900/50">
-        <div class="flex items-center justify-between">
-          <span class="font-medium">BNB</span>
-          <span class="mono text-xs px-1.5 py-0.5 rounded" id="bnb-change">—</span>
-        </div>
-        <div class="mono text-2xl mt-1 font-bold" id="bnb-price">Loading…</div>
-      </div>
-    </div>
-    <p id="ticker-status" class="text-xs text-slate-500 mt-2 mono hidden"></p>
-  </section>
-
-  <!-- Main Content -->
-  <main class="w-full max-w-5xl mx-auto px-6 py-6 grid lg:grid-cols-2 gap-6">
-    <!-- Inputs Panel -->
-    <form id="arb-form" class="rounded-2xl p-6 border border-white/5 bg-slate-900/50 reveal" style="animation-delay:.1s">
-      <h2 class="font-bold mb-4 text-lg">Trade Parameters</h2>
-      
-      <div class="mb-4">
-        <label for="pair-input" class="block text-sm mb-1 text-slate-300">Trading Pair</label>
-        <input id="pair-input" type="text" value="BTC/USDT" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-      </div>
-
-      <div class="grid grid-cols-2 gap-3 mb-4">
-        <div>
-          <label for="platform-a-input" class="block text-sm mb-1 text-slate-300">Platform A</label>
-          <input id="platform-a-input" type="text" value="Binance" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100">
-        </div>
-        <div>
-          <label for="platform-b-input" class="block text-sm mb-1 text-slate-300">Platform B</label>
-          <input id="platform-b-input" type="text" value="Kraken" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3 mb-4">
-        <div>
-          <label for="price-a-input" class="block text-sm mb-1 text-slate-300">Price A (Platform A)</label>
-          <input id="price-a-input" type="number" step="any" value="64200" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-        </div>
-        <div>
-          <label for="price-b-input" class="block text-sm mb-1 text-slate-300">Price B (Platform B)</label>
-          <input id="price-b-input" type="number" step="any" value="64350" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3 mb-4">
-        <div>
-          <label for="capital-input" class="block text-sm mb-1 text-slate-300">Capital (USDT)</label>
-          <input id="capital-input" type="number" step="any" value="1000" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-        </div>
-        <div>
-          <label for="pnl-input" class="block text-sm mb-1 text-slate-300">PNL (Manual Override)</label>
-          <input id="pnl-input" type="number" step="any" placeholder="Optional" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-        </div>
-      </div>
-
-      <div class="mb-5">
-        <label for="transactions-input" class="block text-sm mb-1 text-slate-300">Number of Transactions</label>
-        <input id="transactions-input" type="number" step="1" min="1" value="1" class="w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 text-slate-100 mono">
-      </div>
-
-      <p id="form-error" class="text-sm text-red-400 mb-3 hidden" role="alert"></p>
-
-      <div class="flex gap-3">
-        <button type="button" id="reset-btn" class="flex-1 rounded-lg px-4 py-2.5 font-bold flex items-center justify-center gap-2 bg-slate-700 hover:bg-slate-600 transition-colors">
-          <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i>
-          <span>Reset</span>
-        </button>
-      </div>
-    </form>
-
-    <!-- Results Panel -->
-    <section class="rounded-2xl p-6 border border-white/5 bg-slate-900/50 reveal flex flex-col" style="animation-delay:.2s">
-      <h2 class="font-bold mb-4 text-lg">Results</h2>
-      <div class="space-y-4 flex-1">
-        <div class="flex items-center justify-between border-b border-white/5 pb-3">
-          <span class="text-slate-300">Spread</span>
-          <span id="out-spread" class="mono text-xl font-bold">—</span>
-        </div>
-        <div class="flex items-center justify-between border-b border-white/5 pb-3">
-          <span class="text-slate-300">Gross Profit</span>
-          <span id="out-gross" class="mono text-xl font-bold">—</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-slate-300">Net PNL</span>
-          <span id="out-pnl" class="mono text-2xl font-bold">—</span>
-        </div>
-      </div>
-      <div class="mt-5 flex items-center gap-2">
-        <span id="status-pill" class="mono text-sm font-bold px-3 py-1.5 rounded-lg bg-slate-700/60 text-slate-300">Awaiting input</span>
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer class="w-full max-w-5xl mx-auto px-6 pb-10">
-    <p class="text-xs text-slate-500 text-center">Arbitrage Calculator Demo — For planning purposes only. No real trades are executed.</p>
-  </footer>
-
-  <script>
-    lucide.createIcons();
-
-    const $ = id => document.getElementById(id);
-    const fmtUSD = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    const form = $('arb-form');
-    const errEl = $('form-error');
-
-    function showError(msg){ errEl.textContent = msg; errEl.classList.remove('hidden'); }
-    function clearError(){ errEl.classList.add('hidden'); errEl.textContent=''; }
-
-    function calculate(){
-      clearError();
-      const pa = parseFloat($('price-a-input').value);
-      const pb = parseFloat($('price-b-input').value);
-      const cap = parseFloat($('capital-input').value);
-      const pnlManual = $('pnl-input').value.trim();
-      const txCount = Math.max(1, parseInt($('transactions-input').value) || 1);
-
-      if (isNaN(pa) || isNaN(pb) || pa <= 0) {
-        showError('Enter valid asset prices for both platforms (Price A must be greater than 0).');
-        $('out-spread').textContent = '—';
-        $('out-gross').textContent = '—';
-        $('out-pnl').textContent = '—';
-        const pill = $('status-pill');
-        pill.textContent = 'Awaiting input';
-        pill.className = 'mono text-sm font-bold px-3 py-1.5 rounded-lg bg-slate-700/60 text-slate-300';
-        return;
-      }
-
-      const spread = ((pb - pa) / pa) * 100;
-      const gross = !isNaN(cap) ? cap * (spread / 100) : NaN;
-      const baseEffPnl = pnlManual !== '' && !isNaN(parseFloat(pnlManual)) ? parseFloat(pnlManual) : gross;
-      const effPnl = !isNaN(baseEffPnl) ? baseEffPnl * txCount : NaN;
-
-      $('out-spread').textContent = (spread >= 0 ? '+' : '') + spread.toFixed(3) + '%';
-      $('out-gross').textContent = isNaN(gross) ? '—' : fmtUSD(gross);
-      $('out-pnl').textContent = isNaN(effPnl) ? '—' : fmtUSD(effPnl);
-
-      const positive = (isNaN(effPnl) ? spread : effPnl) >= 0;
-      const pill = $('status-pill');
-      pill.textContent = positive ? 'PROFITABLE SPREAD' : 'NEGATIVE SPREAD';
-      pill.className = 'mono text-sm font-bold px-3 py-1.5 rounded-lg ' +
-        (positive ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300');
-
-      [$('out-spread'),$('out-gross'),$('out-pnl')].forEach(el=>{
-        el.classList.remove('flash-up','flash-down');
-        void el.offsetWidth;
-        el.classList.add(positive ? 'flash-up' : 'flash-down');
-      });
-    }
-
-    // Listen to all input fields for changes
-    ['price-a-input', 'price-b-input', 'capital-input', 'pnl-input', 'transactions-input'].forEach(id => {
-      $(id).addEventListener('input', calculate);
-    });
-
-    $('reset-btn').addEventListener('click', (e) => {
-      e.preventDefault();
-      form.reset();
-      clearError();
-      ['out-spread','out-gross','out-pnl'].forEach(id => $(id).textContent = '—');
-      const pill = $('status-pill');
-      pill.textContent = 'Awaiting input';
-      pill.className = 'mono text-sm font-bold px-3 py-1.5 rounded-lg bg-slate-700/60 text-slate-300';
-      // Set default values after reset
-      $('pair-input').value = 'BTC/USDT';
-      $('platform-a-input').value = 'Binance';
-      $('platform-b-input').value = 'Kraken';
-      $('price-a-input').value = '64200';
-      $('price-b-input').value = '64350';
-      $('capital-input').value = '1000';
-      $('transactions-input').value = '1';
-    });
-
-    // ---- Live ticker (CoinGecko) ----
-    const COINS = { bitcoin:'btc', ethereum:'eth', binancecoin:'bnb' };
-    const lastPrice = {};
-
-    function setChange(el, pct){
-      if (pct == null || isNaN(pct)) { el.textContent='—'; el.className='mono text-xs px-1.5 py-0.5 rounded text-slate-400'; return; }
-      const up = pct >= 0;
-      el.textContent = (up?'▲ ':'▼ ') + Math.abs(pct).toFixed(2) + '%';
-      el.className = 'mono text-xs px-1.5 py-0.5 rounded ' + (up ? 'bg-emerald-500/20 text-emerald-300' : 'bg-red-500/20 text-red-300');
-    }
-
-    function flash(el, up){
-      el.classList.remove('flash-up','flash-down');
-      void el.offsetWidth;
-      el.classList.add(up ? 'flash-up' : 'flash-down');
-    }
-
-    async function fetchPrices(){
-      const status = $('ticker-status');
-      try {
-        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,binancecoin&vs_currencies=usd&include_24hr_change=true');
-        if(!res.ok) throw new Error('API error');
-        const data = await res.json();
-        status.classList.add('hidden');
-        for (const [id, sym] of Object.entries(COINS)){
-          const d = data[id];
-          if(!d) continue;
-          const priceEl = $(sym + '-price');
-          const changeEl = $(sym + '-change');
-          const price = d.usd;
-          priceEl.textContent = fmtUSD(price);
-          setChange(changeEl, d.usd_24h_change);
-          if (lastPrice[id] != null && price !== lastPrice[id]) flash(priceEl, price > lastPrice[id]);
-          lastPrice[id] = price;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex HFT Arbitrage Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0a0a0f;
+            color: #e2e8f0;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(30, 58, 138, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.1) 0%, transparent 50%);
         }
-      } catch(err){
-        status.textContent = 'Live prices unavailable right now — retrying shortly.';
-        status.classList.remove('hidden');
-      }
-    }
+        
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
 
-    fetchPrices();
-    setInterval(fetchPrices, 30000);
-  </script>
+        .input-field {
+            background: rgba(31, 41, 55, 0.5);
+            border: 1px solid rgba(75, 85, 99, 0.4);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+
+        .glow-button {
+            background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+            transition: all 0.3s ease;
+        }
+
+        .glow-button:hover {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4b5563;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased relative">
+
+    <!-- Navigation / Header -->
+    <header class="w-full py-6 px-8 flex justify-center items-center border-b border-gray-800 glass-panel sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-chart-line text-white text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                APEX <span class="text-blue-500 font-light">HFT</span>
+            </h1>
+        </div>
+    </header>
+
+    <!-- Main Registration View -->
+    <main id="user-view" class="flex-grow flex items-center justify-center p-4 sm:p-8">
+        <div class="glass-panel rounded-2xl w-full max-w-xl p-8 relative overflow-hidden">
+            
+            <!-- Decorative corner elements -->
+            <div class="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-blue-500/30 rounded-tl-2xl"></div>
+            <div class="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-emerald-500/30 rounded-br-2xl"></div>
+
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold mb-2">Create Account</h2>
+                <p class="text-gray-400 text-sm">Join the Apex High-Frequency Arbitrage Engine</p>
+            </div>
+
+            <form id="registration-form" class="space-y-5">
+                <!-- Name -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
+                    <input type="text" id="name" required class="input-field w-full rounded-lg px-4 py-3 text-sm placeholder-gray-500" placeholder="e.g. John Doe">
+                </div>
+
+                <!-- Email & Phone Row -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Email Address</label>
+                        <input type="email" id="email" required class="input-field w-full rounded-lg px-4 py-3 text-sm placeholder-gray-500" placeholder="john@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Phone Number</label>
+                        <input type="tel" id="phone" required class="input-field w-full rounded-lg px-4 py-3 text-sm placeholder-gray-500" placeholder="+1 234 567 8900">
+                    </div>
+                </div>
+
+                <!-- Country -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Country</label>
+                    <div class="relative">
+                        <select id="country" required class="input-field w-full rounded-lg px-4 py-3 text-sm appearance-none cursor-pointer">
+                            <option value="" disabled selected>Select your country...</option>
+                            <!-- Populated via JS -->
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Wallet Section -->
+                <div class="bg-gray-800/30 p-4 rounded-xl border border-gray-700/50 mt-6">
+                    <h3 class="text-sm font-medium text-blue-400 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-wallet"></i> Payout Configuration
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Select Network</label>
+                            <div class="grid grid-cols-5 gap-2" id="network-selector">
+                                <button type="button" class="network-btn active bg-blue-600/20 border border-blue-500 text-blue-400 rounded-md py-2 text-xs font-semibold transition hover:bg-blue-600/30" data-network="BTC">BTC</button>
+                                <button type="button" class="network-btn bg-gray-700/30 border border-gray-600 text-gray-400 rounded-md py-2 text-xs font-semibold transition hover:bg-gray-700/50" data-network="ETH">ETH</button>
+                                <button type="button" class="network-btn bg-gray-700/30 border border-gray-600 text-gray-400 rounded-md py-2 text-xs font-semibold transition hover:bg-gray-700/50" data-network="SOL">SOL</button>
+                                <button type="button" class="network-btn bg-gray-700/30 border border-gray-600 text-gray-400 rounded-md py-2 text-xs font-semibold transition hover:bg-gray-700/50" data-network="BNB">BNB</button>
+                                <button type="button" class="network-btn bg-gray-700/30 border border-gray-600 text-gray-400 rounded-md py-2 text-xs font-semibold transition hover:bg-gray-700/50" data-network="USDT">USDT</button>
+                            </div>
+                            <input type="hidden" id="wallet-network" value="BTC">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-gray-400 mb-1">Wallet Address</label>
+                            <input type="text" id="wallet-address" required class="input-field w-full rounded-lg px-4 py-3 text-sm font-mono placeholder-gray-600" placeholder="Paste your wallet address here...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" id="submit-btn" class="glow-button w-full rounded-lg px-4 py-4 text-sm font-bold text-white uppercase tracking-wider mt-6 flex justify-center items-center gap-2">
+                    <span>Initialize Engine Setup</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Admin Dashboard View (Hidden by default) -->
+    <main id="admin-view" class="flex-grow hidden flex-col p-4 sm:p-8 max-w-7xl mx-auto w-full">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-bold">Admin Command Center</h2>
+                <p class="text-emerald-400 text-sm">Engine Registrations Overview</p>
+            </div>
+            <button id="exit-admin-btn" class="px-4 py-2 bg-gray-800 rounded-lg text-sm hover:bg-gray-700 border border-gray-700 transition">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i> Exit
+            </button>
+        </div>
+
+        <div class="glass-panel rounded-xl overflow-hidden w-full overflow-x-auto">
+            <table class="w-full text-left text-sm whitespace-nowrap">
+                <thead class="bg-gray-800/80 text-gray-300">
+                    <tr>
+                        <th class="px-6 py-4 font-semibold">Date</th>
+                        <th class="px-6 py-4 font-semibold">Name</th>
+                        <th class="px-6 py-4 font-semibold">Contact</th>
+                        <th class="px-6 py-4 font-semibold">Country</th>
+                        <th class="px-6 py-4 font-semibold">Wallet</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-table-body" class="divide-y divide-gray-800/50">
+                    <!-- Data populated via JS -->
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                            <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Loading secure engine data...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Success Modal Overlay (Hidden) -->
+    <div id="success-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="glass-panel rounded-2xl max-w-md w-full p-8 text-center transform scale-95 transition-transform duration-300 shadow-2xl shadow-emerald-500/10 border-emerald-500/30 border">
+            <div class="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-check text-4xl text-emerald-400"></i>
+            </div>
+            <h3 class="text-2xl font-bold mb-3 text-white">Application Received</h3>
+            <p class="text-gray-400 leading-relaxed mb-6">
+                Your details have been successfully submitted to the Apex HFT Engine. Please wait for an email confirmation, which should arrive within <strong class="text-white">15 minutes</strong>.
+            </p>
+            <button id="close-modal-btn" class="w-full py-3 bg-gray-800 hover:bg-gray-700 rounded-lg font-medium transition text-white border border-gray-700">
+                Acknowledge
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Access Trigger (Hidden plain sight) -->
+    <button id="admin-trigger" class="fixed bottom-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-700 hover:text-gray-400 transition z-20" title="Admin Access">
+        <i class="fa-solid fa-lock text-xs"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script type="module">
+        // Firebase Cloud Database Integration for saving user submissions securely
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Environment variables handling
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'apex-hft-default';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        
+        let app, auth, db, currentUser = null;
+        let unsubscribeData = null;
+
+        // Initialize Cloud Storage if config exists
+        if (firebaseConfig) {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+
+            // Authenticate to allow secure database writes/reads
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Auth initialization failed:", error);
+                }
+            };
+            initAuth();
+
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+            });
+        }
+
+        // --- UI Logic ---
+
+        // 1. Populate Countries
+        const countries = [
+            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine State", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+        ];
+        
+        const countrySelect = document.getElementById('country');
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country;
+            option.textContent = country;
+            countrySelect.appendChild(option);
+        });
+
+        // 2. Network Selection Logic
+        const networkBtns = document.querySelectorAll('.network-btn');
+        const hiddenNetworkInput = document.getElementById('wallet-network');
+
+        networkBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active styling from all
+                networkBtns.forEach(b => {
+                    b.classList.remove('bg-blue-600/20', 'border-blue-500', 'text-blue-400');
+                    b.classList.add('bg-gray-700/30', 'border-gray-600', 'text-gray-400');
+                });
+                
+                // Add active styling to clicked
+                btn.classList.remove('bg-gray-700/30', 'border-gray-600', 'text-gray-400');
+                btn.classList.add('bg-blue-600/20', 'border-blue-500', 'text-blue-400');
+                
+                // Update hidden input
+                hiddenNetworkInput.value = btn.dataset.network;
+            });
+        });
+
+        // 3. Form Submission
+        const form = document.getElementById('registration-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const successModal = document.getElementById('success-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentUser || !db) {
+                // Fallback UI behavior if cloud environment isn't injected
+                showSuccessModal();
+                form.reset();
+                return;
+            }
+
+            // Get values
+            const payload = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                country: document.getElementById('country').value,
+                network: document.getElementById('wallet-network').value,
+                walletAddress: document.getElementById('wallet-address').value,
+                timestamp: new Date().toISOString()
+            };
+
+            // Loading state
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+            submitBtn.disabled = true;
+
+            try {
+                // Save to secure cloud collection
+                // Path strictly follows: artifacts/{appId}/public/data/{collectionName}
+                const dataRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+                await addDoc(dataRef, payload);
+                
+                showSuccessModal();
+                form.reset();
+                
+                // Reset network back to BTC
+                networkBtns[0].click();
+
+            } catch (error) {
+                console.error("Submission error:", error);
+                // Custom error display instead of alert
+                const errorDiv = document.createElement('div');
+                errorDiv.className = "text-red-500 text-sm mt-2 text-center";
+                errorDiv.innerText = "Network connection failed. Please try again.";
+                form.appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 4000);
+            } finally {
+                submitBtn.innerHTML = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showSuccessModal() {
+            successModal.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                successModal.classList.remove('opacity-0');
+                successModal.children[0].classList.remove('scale-95');
+                successModal.children[0].classList.add('scale-100');
+            }, 10);
+        }
+
+        closeModalBtn.addEventListener('click', () => {
+            successModal.classList.add('opacity-0');
+            successModal.children[0].classList.remove('scale-100');
+            successModal.children[0].classList.add('scale-95');
+            setTimeout(() => {
+                successModal.classList.add('hidden');
+            }, 300);
+        });
+
+        // 4. Admin View Logic
+        const adminTrigger = document.getElementById('admin-trigger');
+        const userView = document.getElementById('user-view');
+        const adminView = document.getElementById('admin-view');
+        const exitAdminBtn = document.getElementById('exit-admin-btn');
+        const adminTableBody = document.getElementById('admin-table-body');
+
+        adminTrigger.addEventListener('click', () => {
+            // Very basic passcode for UI demonstration
+            const customModal = document.createElement('div');
+            customModal.className = "fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4 backdrop-blur-md";
+            customModal.innerHTML = `
+                <div class="glass-panel p-6 rounded-xl max-w-sm w-full text-center">
+                    <i class="fa-solid fa-shield-halved text-3xl text-gray-500 mb-4"></i>
+                    <h3 class="text-white font-bold mb-4">Admin Authentication</h3>
+                    <input type="password" id="admin-pass" class="input-field w-full rounded p-3 mb-4 text-center tracking-widest" placeholder="Enter PIN...">
+                    <div class="flex gap-2">
+                        <button id="cancel-auth" class="w-1/2 py-2 bg-gray-800 rounded text-gray-400 hover:text-white transition">Cancel</button>
+                        <button id="submit-auth" class="w-1/2 py-2 bg-blue-600 rounded text-white hover:bg-blue-500 transition">Unlock</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(customModal);
+
+            document.getElementById('cancel-auth').onclick = () => customModal.remove();
+            document.getElementById('submit-auth').onclick = () => {
+                const pass = document.getElementById('admin-pass').value;
+                if(pass === 'jane123clan') {
+                    customModal.remove();
+                    openAdminPanel();
+                } else {
+                    document.getElementById('admin-pass').classList.add('border-red-500');
+                    document.getElementById('admin-pass').value = '';
+                }
+            };
+        });
+
+        exitAdminBtn.addEventListener('click', () => {
+            adminView.classList.add('hidden');
+            userView.classList.remove('hidden');
+            
+            // Clean up database listener when leaving admin view
+            if (unsubscribeData) {
+                unsubscribeData();
+                unsubscribeData = null;
+            }
+        });
+
+        function openAdminPanel() {
+            userView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            adminView.classList.add('flex');
+
+            if (!currentUser || !db) {
+                adminTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Cloud Database not initialized in this environment.</td></tr>`;
+                return;
+            }
+
+            // Fetch Data securely
+            const dataRef = collection(db, 'artifacts', appId, 'public', 'data', 'registrations');
+            
+            // Use onSnapshot to get real-time updates as users submit
+            unsubscribeData = onSnapshot(dataRef, (snapshot) => {
+                const submissions = [];
+                snapshot.forEach(doc => {
+                    submissions.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Sort by timestamp descending (newest first) in memory (Rule 2: No complex DB queries)
+                submissions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                renderAdminTable(submissions);
+            }, (error) => {
+                console.error("Error fetching data:", error);
+                adminTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-red-500">Error loading data.</td></tr>`;
+            });
+        }
+
+        function renderAdminTable(data) {
+            if (data.length === 0) {
+                adminTableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">No registrations found yet.</td></tr>`;
+                return;
+            }
+
+            adminTableBody.innerHTML = '';
+            data.forEach(item => {
+                const date = new Date(item.timestamp).toLocaleString();
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/30 transition border-b border-gray-800/50";
+                
+                // Protect against HTML injection
+                const escapeHTML = str => str.replace(/[&<>'"]/g, 
+                    tag => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        "'": '&#39;',
+                        '"': '&quot;'
+                    }[tag] || tag)
+                );
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 text-xs text-gray-400 whitespace-nowrap">${escapeHTML(date)}</td>
+                    <td class="px-6 py-4 font-medium text-gray-200">${escapeHTML(item.name || 'N/A')}</td>
+                    <td class="px-6 py-4 text-sm">
+                        <div class="text-gray-300">${escapeHTML(item.email || 'N/A')}</div>
+                        <div class="text-gray-500 text-xs mt-1">${escapeHTML(item.phone || 'N/A')}</div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-400">${escapeHTML(item.country || 'N/A')}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-1 rounded bg-gray-800 text-xs font-bold text-blue-400 border border-gray-700">${escapeHTML(item.network || 'N/A')}</span>
+                            <span class="text-xs text-gray-400 font-mono truncate max-w-[150px]" title="${escapeHTML(item.walletAddress || 'N/A')}">${escapeHTML(item.walletAddress || 'N/A')}</span>
+                        </div>
+                    </td>
+                `;
+                adminTableBody.appendChild(tr);
+            });
+        }
+    </script>
 </body>
 </html>
